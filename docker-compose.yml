@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=your_jwt_secret_here
+      - DATABASE_URL=postgresql://wallet_user_1:secure123@db:5432/walletdb
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=walletdb
+      - DB_USER=wallet_user_1
+      - DB_PASSWORD=secure123
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=walletdb
+      - POSTGRES_USER=wallet_user_1
+      - POSTGRES_PASSWORD=secure123
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wallet_user_1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
